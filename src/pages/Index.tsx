@@ -31,7 +31,7 @@ const Index = () => {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const categories = ['Все игры', 'CS:GO', 'Dota 2', 'Rust', 'GTA V', 'Minecraft', 'Roblox', 'Standoff 2'];
+  const categories = ['Все игры', 'CS:GO', 'GTA V', 'Minecraft', 'Roblox', 'Standoff 2'];
 
   const products: Product[] = [
     {
@@ -46,16 +46,6 @@ const Index = () => {
     },
     {
       id: 2,
-      title: 'Arcana Techies',
-      game: 'Dota 2',
-      price: 2500,
-      seller: 'DotaKing',
-      sellerRating: 4.9,
-      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop',
-      description: 'Эксклюзивная аркана с эффектами'
-    },
-    {
-      id: 3,
       title: 'AK-47 | Fire Serpent',
       game: 'CS:GO',
       price: 12000,
@@ -63,16 +53,6 @@ const Index = () => {
       sellerRating: 4.7,
       image: 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?w=400&h=300&fit=crop',
       description: 'Коллекционный скин с минимальным износом'
-    },
-    {
-      id: 4,
-      title: 'Набор ресурсов (10000 дерева)',
-      game: 'Rust',
-      price: 500,
-      seller: 'RustMaster',
-      sellerRating: 4.6,
-      image: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=300&fit=crop',
-      description: 'Быстрая доставка ресурсов на сервер'
     },
     {
       id: 5,
