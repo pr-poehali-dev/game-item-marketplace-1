@@ -34,51 +34,16 @@ const Index = () => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [supportMessages, setSupportMessages] = useState<{text: string, sender: 'user' | 'support', time: string}[]>([]);
+  const [supportInput, setSupportInput] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
+  const [userProducts, setUserProducts] = useState<Product[]>([]);
+  const [purchaseHistory, setPurchaseHistory] = useState<{product: string, price: number, date: string, seller: string}[]>([]);
 
   const categories = ['Все игры', 'CS:GO', 'GTA V', 'Minecraft', 'Roblox', 'Standoff 2'];
 
-  const products: Product[] = [
-    {
-      id: 1,
-      title: 'AWP | Dragon Lore (Factory New)',
-      game: 'CS:GO',
-      price: 45000,
-      seller: 'ProGamer123',
-      sellerRating: 4.8,
-      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop',
-      description: 'Редкий скин в идеальном состоянии'
-    },
-    {
-      id: 2,
-      title: 'AK-47 | Fire Serpent',
-      game: 'CS:GO',
-      price: 12000,
-      seller: 'TraderPro',
-      sellerRating: 4.7,
-      image: 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?w=400&h=300&fit=crop',
-      description: 'Коллекционный скин с минимальным износом'
-    },
-    {
-      id: 5,
-      title: 'Robux Premium Pack (10000)',
-      game: 'Roblox',
-      price: 3500,
-      seller: 'RobloxPro',
-      sellerRating: 4.9,
-      image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop',
-      description: 'Пополнение Robux на аккаунт за 5 минут'
-    },
-    {
-      id: 6,
-      title: 'Golden AK-47 | Пламя',
-      game: 'Standoff 2',
-      price: 1800,
-      seller: 'SO2Trader',
-      sellerRating: 4.8,
-      image: 'https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?w=400&h=300&fit=crop',
-      description: 'Легендарное золотое оружие с эффектом'
-    },
-  ];
+  const products: Product[] = userProducts;
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -196,26 +161,66 @@ const Index = () => {
                     <Button variant="outline" onClick={() => setIsAddProductOpen(false)}>
                       Отмена
                     </Button>
-                    <Button onClick={() => setIsAddProductOpen(false)}>
+                    <Button onClick={() => {
+                      const title = (document.getElementById('product-title') as HTMLInputElement)?.value;
+                      const game = (document.getElementById('product-game') as HTMLInputElement)?.value;
+                      const price = parseInt((document.getElementById('product-price') as HTMLInputElement)?.value || '0');
+                      const description = (document.getElementById('product-description') as HTMLTextAreaElement)?.value;
+                      
+                      if (title && game && price && imagePreview) {
+                        const newProduct: Product = {
+                          id: Date.now(),
+                          title,
+                          game,
+                          price,
+                          seller: username,
+                          sellerRating: 5.0,
+                          image: imagePreview,
+                          description
+                        };
+                        setUserProducts([...userProducts, newProduct]);
+                        setIsAddProductOpen(false);
+                        setImagePreview('');
+                        setImageFile(null);
+                      }
+                    }}>
                       Создать товар
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
 
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={() => setIsSupportOpen(true)}
+              >
+                <Icon name="HeadphonesIcon" size={18} />
+                Поддержка
+              </Button>
+
               {isLoggedIn ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">Привет, {username}!</span>
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => setShowProfile(!showProfile)}
+                  >
+                    <Icon name="User" size={18} />
+                    {username}
+                  </Button>
                   <Button 
                     variant="outline" 
-                    className="gap-2"
+                    size="icon"
                     onClick={() => {
                       setIsLoggedIn(false);
                       setUsername('');
+                      setShowProfile(false);
+                      setUserProducts([]);
+                      setPurchaseHistory([]);
                     }}
                   >
                     <Icon name="LogOut" size={18} />
-                    Выйти
                   </Button>
                 </div>
               ) : (
@@ -250,10 +255,107 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Маркетплейс игровых предметов</h2>
-          <p className="text-gray-600">Покупайте и продавайте игровые предметы безопасно</p>
-        </div>
+        {showProfile && isLoggedIn ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold">Личный кабинет</h2>
+              <Button variant="outline" onClick={() => setShowProfile(false)}>
+                <Icon name="ArrowLeft" size={18} className="mr-2" />
+                Вернуться к каталогу
+              </Button>
+            </div>
+
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="User" size={24} />
+                    Профиль
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-16 h-16">
+                      <AvatarFallback className="bg-primary text-white text-xl">
+                        {username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-xl font-bold">{username}</p>
+                      <p className="text-sm text-gray-600">Продавец на платформе</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="Package" size={24} />
+                    Мои товары ({userProducts.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {userProducts.length === 0 ? (
+                    <p className="text-gray-600 text-center py-8">У вас пока нет товаров</p>
+                  ) : (
+                    <div className="grid gap-4">
+                      {userProducts.map((product) => (
+                        <div key={product.id} className="flex gap-4 border rounded-lg p-4">
+                          <img src={product.image} alt={product.title} className="w-24 h-24 object-cover rounded" />
+                          <div className="flex-1">
+                            <h3 className="font-bold">{product.title}</h3>
+                            <p className="text-sm text-gray-600">{product.game}</p>
+                            <p className="text-lg font-bold text-primary mt-2">{product.price.toLocaleString('ru-RU')} ₽</p>
+                          </div>
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            onClick={() => setUserProducts(userProducts.filter(p => p.id !== product.id))}
+                          >
+                            <Icon name="Trash2" size={18} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="ShoppingBag" size={24} />
+                    История покупок ({purchaseHistory.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {purchaseHistory.length === 0 ? (
+                    <p className="text-gray-600 text-center py-8">Вы пока ничего не купили</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {purchaseHistory.map((purchase, index) => (
+                        <div key={index} className="flex justify-between items-center border-b pb-3">
+                          <div>
+                            <p className="font-medium">{purchase.product}</p>
+                            <p className="text-sm text-gray-600">Продавец: {purchase.seller}</p>
+                            <p className="text-xs text-gray-500">{purchase.date}</p>
+                          </div>
+                          <p className="font-bold text-primary">{purchase.price.toLocaleString('ru-RU')} ₽</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold mb-2">Маркетплейс игровых предметов</h2>
+              <p className="text-gray-600">Покупайте и продавайте игровые предметы безопасно</p>
+            </div>
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
@@ -362,16 +464,20 @@ const Index = () => {
                         <Button 
                           className="w-full gap-2"
                           onClick={() => {
+                            setPurchaseHistory([
+                              ...purchaseHistory,
+                              {
+                                product: product.title,
+                                price: product.price,
+                                date: new Date().toLocaleDateString('ru-RU'),
+                                seller: product.seller
+                              }
+                            ]);
                             setChatSeller(product.seller);
                             setChatMessages([
                               {
                                 text: `Здравствуйте! Я оплатил товар "${product.title}" переводом на карту 2202 2067 5930 1174. Как получить покупку?`,
                                 sender: 'user',
-                                time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-                              },
-                              {
-                                text: 'Привет! Спасибо за покупку. Проверю платеж и сейчас передам вам товар. Какой ваш игровой ник?',
-                                sender: 'seller',
                                 time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
                               }
                             ]);
@@ -391,6 +497,8 @@ const Index = () => {
               </Card>
             ))}
           </div>
+        )}
+          </>
         )}
       </main>
 
@@ -626,6 +734,97 @@ const Index = () => {
               )}
             </div>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSupportOpen} onOpenChange={setIsSupportOpen}>
+        <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                <Icon name="HeadphonesIcon" className="text-white" size={20} />
+              </div>
+              <div>
+                <DialogTitle>Поддержка GameMarket</DialogTitle>
+                <DialogDescription>Мы онлайн и готовы помочь</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {supportMessages.length === 0 ? (
+              <div className="text-center py-12">
+                <Icon name="MessageCircle" className="mx-auto mb-4 text-gray-400" size={64} />
+                <h3 className="text-lg font-semibold mb-2">Чат поддержки</h3>
+                <p className="text-gray-600">Опишите вашу проблему, и мы поможем её решить</p>
+              </div>
+            ) : (
+              supportMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[70%] rounded-lg p-3 ${
+                      msg.sender === 'user'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <span className={`text-xs mt-1 block ${
+                      msg.sender === 'user' ? 'text-white/70' : 'text-gray-500'
+                    }`}>
+                      {msg.time}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="p-4 border-t bg-gray-50">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Опишите вашу проблему..."
+                value={supportInput}
+                onChange={(e) => setSupportInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && supportInput.trim()) {
+                    setSupportMessages([
+                      ...supportMessages,
+                      {
+                        text: supportInput,
+                        sender: 'user',
+                        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                      }
+                    ]);
+                    setSupportInput('');
+                  }
+                }}
+              />
+              <Button
+                onClick={() => {
+                  if (supportInput.trim()) {
+                    setSupportMessages([
+                      ...supportMessages,
+                      {
+                        text: supportInput,
+                        sender: 'user',
+                        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                      }
+                    ]);
+                    setSupportInput('');
+                  }
+                }}
+              >
+                <Icon name="Send" size={18} />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Администратор увидит ваше сообщение и ответит в ближайшее время
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
