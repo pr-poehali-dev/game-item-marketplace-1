@@ -24,8 +24,12 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все игры');
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatSeller, setChatSeller] = useState<string>('');
+  const [chatMessages, setChatMessages] = useState<{text: string, sender: 'user' | 'seller', time: string}[]>([]);
+  const [messageInput, setMessageInput] = useState('');
 
-  const categories = ['Все игры', 'CS:GO', 'Dota 2', 'Rust', 'GTA V', 'Minecraft'];
+  const categories = ['Все игры', 'CS:GO', 'Dota 2', 'Rust', 'GTA V', 'Minecraft', 'Roblox', 'Standoff 2'];
 
   const products: Product[] = [
     {
@@ -67,6 +71,26 @@ const Index = () => {
       sellerRating: 4.6,
       image: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=300&fit=crop',
       description: 'Быстрая доставка ресурсов на сервер'
+    },
+    {
+      id: 5,
+      title: 'Robux Premium Pack (10000)',
+      game: 'Roblox',
+      price: 3500,
+      seller: 'RobloxPro',
+      sellerRating: 4.9,
+      image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop',
+      description: 'Пополнение Robux на аккаунт за 5 минут'
+    },
+    {
+      id: 6,
+      title: 'Golden AK-47 | Пламя',
+      game: 'Standoff 2',
+      price: 1800,
+      seller: 'SO2Trader',
+      sellerRating: 4.8,
+      image: 'https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?w=400&h=300&fit=crop',
+      description: 'Легендарное золотое оружие с эффектом'
     },
   ];
 
@@ -260,7 +284,25 @@ const Index = () => {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button className="w-full gap-2">
+                        <Button 
+                          className="w-full gap-2"
+                          onClick={() => {
+                            setChatSeller(product.seller);
+                            setChatMessages([
+                              {
+                                text: `Здравствуйте! Я купил товар "${product.title}". Как получить покупку?`,
+                                sender: 'user',
+                                time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                              },
+                              {
+                                text: 'Привет! Спасибо за покупку. Сейчас передам вам товар. Какой ваш игровой ник?',
+                                sender: 'seller',
+                                time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                              }
+                            ]);
+                            setIsChatOpen(true);
+                          }}
+                        >
                           <Icon name="ShieldCheck" size={18} />
                           Оплатить {product.price.toLocaleString('ru-RU')} ₽
                         </Button>
@@ -328,6 +370,88 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-4 border-b">
+            <div className="flex items-center gap-3">
+              <Avatar className="w-10 h-10">
+                <AvatarFallback className="bg-primary text-white">
+                  {chatSeller.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <DialogTitle>Чат с {chatSeller}</DialogTitle>
+                <DialogDescription>Продавец онлайн</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[70%] rounded-lg p-3 ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <span className={`text-xs mt-1 block ${
+                    msg.sender === 'user' ? 'text-white/70' : 'text-gray-500'
+                  }`}>
+                    {msg.time}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Напишите сообщение..."
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && messageInput.trim()) {
+                    setChatMessages([
+                      ...chatMessages,
+                      {
+                        text: messageInput,
+                        sender: 'user',
+                        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                      }
+                    ]);
+                    setMessageInput('');
+                  }
+                }}
+              />
+              <Button
+                onClick={() => {
+                  if (messageInput.trim()) {
+                    setChatMessages([
+                      ...chatMessages,
+                      {
+                        text: messageInput,
+                        sender: 'user',
+                        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                      }
+                    ]);
+                    setMessageInput('');
+                  }
+                }}
+              >
+                <Icon name="Send" size={18} />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
