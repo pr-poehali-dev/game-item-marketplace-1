@@ -313,19 +313,42 @@ const Index = () => {
                             {product.price.toLocaleString('ru-RU')} ₽
                           </span>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="card-number">Номер карты</Label>
-                          <Input id="card-number" placeholder="0000 0000 0000 0000" />
+                        
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <Icon name="Info" className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-blue-900">
+                                Переведите {product.price.toLocaleString('ru-RU')} ₽ на карту:
+                              </p>
+                              <div className="flex items-center gap-2 bg-white rounded-md p-3 border border-blue-200">
+                                <span className="font-mono text-lg font-bold text-gray-900">
+                                  2202 2067 5930 1174
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText('2202206759301174');
+                                  }}
+                                >
+                                  <Icon name="Copy" size={16} />
+                                </Button>
+                              </div>
+                              <p className="text-xs text-blue-700">
+                                После перевода нажмите кнопку "Подтвердить оплату" ниже
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="expiry">Срок действия</Label>
-                            <Input id="expiry" placeholder="MM/YY" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="cvv">CVV</Label>
-                            <Input id="cvv" placeholder="000" type="password" />
-                          </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="payment-comment">Комментарий к переводу (необязательно)</Label>
+                          <Input 
+                            id="payment-comment" 
+                            placeholder="Ваше имя или номер заказа" 
+                          />
                         </div>
                       </div>
                       <DialogFooter>
@@ -335,12 +358,12 @@ const Index = () => {
                             setChatSeller(product.seller);
                             setChatMessages([
                               {
-                                text: `Здравствуйте! Я купил товар "${product.title}". Как получить покупку?`,
+                                text: `Здравствуйте! Я оплатил товар "${product.title}" переводом на карту 2202 2067 5930 1174. Как получить покупку?`,
                                 sender: 'user',
                                 time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
                               },
                               {
-                                text: 'Привет! Спасибо за покупку. Сейчас передам вам товар. Какой ваш игровой ник?',
+                                text: 'Привет! Спасибо за покупку. Проверю платеж и сейчас передам вам товар. Какой ваш игровой ник?',
                                 sender: 'seller',
                                 time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
                               }
@@ -349,7 +372,7 @@ const Index = () => {
                           }}
                         >
                           <Icon name="ShieldCheck" size={18} />
-                          Оплатить {product.price.toLocaleString('ru-RU')} ₽
+                          Подтвердить оплату
                         </Button>
                       </DialogFooter>
                     </DialogContent>
