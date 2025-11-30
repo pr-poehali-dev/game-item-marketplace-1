@@ -28,6 +28,8 @@ const Index = () => {
   const [chatSeller, setChatSeller] = useState<string>('');
   const [chatMessages, setChatMessages] = useState<{text: string, sender: 'user' | 'seller', time: string}[]>([]);
   const [messageInput, setMessageInput] = useState('');
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const categories = ['Все игры', 'CS:GO', 'Dota 2', 'Rust', 'GTA V', 'Minecraft', 'Roblox', 'Standoff 2'];
 
@@ -159,8 +161,51 @@ const Index = () => {
                       <Textarea id="product-description" placeholder="Опишите ваш товар..." rows={4} />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="product-image">Изображение (URL)</Label>
-                      <Input id="product-image" placeholder="https://..." />
+                      <Label htmlFor="product-image">Изображение товара</Label>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <Input 
+                            id="product-image" 
+                            type="file" 
+                            accept="image/*"
+                            className="cursor-pointer"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setImageFile(file);
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setImagePreview(reader.result as string);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </div>
+                        {imagePreview && (
+                          <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-gray-200">
+                            <img 
+                              src={imagePreview} 
+                              alt="Предпросмотр" 
+                              className="w-full h-full object-cover"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2"
+                              onClick={() => {
+                                setImagePreview('');
+                                setImageFile(null);
+                                const input = document.getElementById('product-image') as HTMLInputElement;
+                                if (input) input.value = '';
+                              }}
+                            >
+                              <Icon name="X" size={18} />
+                            </Button>
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500">Поддерживаются форматы: JPG, PNG, GIF (макс. 5 МБ)</p>
+                      </div>
                     </div>
                   </div>
                   <DialogFooter>
