@@ -30,6 +30,10 @@ const Index = () => {
   const [messageInput, setMessageInput] = useState('');
   const [imagePreview, setImagePreview] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
 
   const categories = ['Все игры', 'CS:GO', 'GTA V', 'Minecraft', 'Roblox', 'Standoff 2'];
 
@@ -199,10 +203,33 @@ const Index = () => {
                 </DialogContent>
               </Dialog>
 
-              <Button className="gap-2">
-                <Icon name="User" size={18} />
-                Профиль
-              </Button>
+              {isLoggedIn ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium">Привет, {username}!</span>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={() => {
+                      setIsLoggedIn(false);
+                      setUsername('');
+                    }}
+                  >
+                    <Icon name="LogOut" size={18} />
+                    Выйти
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  className="gap-2"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setIsAuthOpen(true);
+                  }}
+                >
+                  <Icon name="User" size={18} />
+                  Войти
+                </Button>
+              )}
             </div>
           </div>
 
@@ -498,6 +525,107 @@ const Index = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAuthOpen} onOpenChange={setIsAuthOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{authMode === 'login' ? 'Вход в аккаунт' : 'Регистрация'}</DialogTitle>
+            <DialogDescription>
+              {authMode === 'login' 
+                ? 'Введите свои данные для входа' 
+                : 'Создайте новый аккаунт на платформе'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {authMode === 'register' && (
+              <div className="space-y-2">
+                <Label htmlFor="reg-username">Имя пользователя</Label>
+                <Input 
+                  id="reg-username" 
+                  placeholder="Ваш ник на платформе"
+                  required
+                />
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="auth-email">Email</Label>
+              <Input 
+                id="auth-email" 
+                type="email" 
+                placeholder="example@mail.com"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="auth-password">Пароль</Label>
+              <Input 
+                id="auth-password" 
+                type="password" 
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {authMode === 'register' && (
+              <div className="space-y-2">
+                <Label htmlFor="auth-password-confirm">Подтвердите пароль</Label>
+                <Input 
+                  id="auth-password-confirm" 
+                  type="password" 
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex-col gap-3">
+            <Button 
+              className="w-full"
+              onClick={() => {
+                const usernameInput = authMode === 'register' 
+                  ? (document.getElementById('reg-username') as HTMLInputElement)?.value 
+                  : (document.getElementById('auth-email') as HTMLInputElement)?.value.split('@')[0];
+                
+                if (usernameInput) {
+                  setUsername(usernameInput);
+                  setIsLoggedIn(true);
+                  setIsAuthOpen(false);
+                }
+              }}
+            >
+              {authMode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+            </Button>
+
+            <div className="text-center text-sm">
+              {authMode === 'login' ? (
+                <p className="text-gray-600">
+                  Нет аккаунта?{' '}
+                  <button
+                    className="text-primary font-medium hover:underline"
+                    onClick={() => setAuthMode('register')}
+                  >
+                    Зарегистрируйтесь
+                  </button>
+                </p>
+              ) : (
+                <p className="text-gray-600">
+                  Уже есть аккаунт?{' '}
+                  <button
+                    className="text-primary font-medium hover:underline"
+                    onClick={() => setAuthMode('login')}
+                  >
+                    Войдите
+                  </button>
+                </p>
+              )}
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
